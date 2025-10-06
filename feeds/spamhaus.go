@@ -2,18 +2,20 @@ package feeds
 
 import (
 	"bufio"
-	//"fmt"
 	"log"
 	"net/http"
 	"strings"
+	"github.com/kwalkley27/threat-to-sigma/config"
 )
 
 func Retrieve() []string {
 	
+	cfg := config.Load()
+
 	ipList := []string{}
 	
 	// Fetch the DROP list
-	resp, err := http.Get("https://www.spamhaus.org/drop/drop.txt")
+	resp, err := http.Get(cfg.SpamhausFeedURL)
 	if err != nil {
 		log.Fatalf("Failed to fetch DROP list: %v", err)
 	}
@@ -33,8 +35,13 @@ func Retrieve() []string {
 			continue
 		}
 		
-		//fmt.Println(strings.Split(line, " ; ")[0])
+		//strip extra line details and add cidrs to list
 		ipList = append(ipList, strings.Split(line, " ; ")[0])
+
+		//stop processing cidrs when the limit is reached
+		if len(ipList)>=cfg.FeedLimit {
+			break
+		}
 	}
 
 	// Check for errors during scanning

@@ -32,4 +32,5 @@ go.work.sum
 # .vscode/
 
 .gemini_creds
+.alienvault
 

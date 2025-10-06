@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"context"
+	"sync"
 
 	"github.com/google/generative-ai-go/genai"
 	"google.golang.org/api/option"
@@ -40,6 +41,12 @@ func genSingleSigma(ctx context.Context, model *genai.GenerativeModel, ioc strin
 	}
 }
 
+func processIOC(ctx context.Context, model *genai.GenerativeModel, ioc string, wg *sync.WaitGroup) {
+	defer wg.Done()
+	genSingleSigma(ctx, model, ioc)
+	fmt.Println()
+}
+
 func FormatSigma(ctx context.Context, iocs []string) {
 	
 	//Load global configs
@@ -58,11 +65,21 @@ func FormatSigma(ctx context.Context, iocs []string) {
 
 	// Set Model
 	model := client.GenerativeModel(cfg.ModelName)
-	
-	// Generate and print sigma rule for each ioc
+
+	// Generate and print sigma rule for each ioc asynchronously
+	var wg sync.WaitGroup
+	semaphore := make(chan struct{}, cfg.MaxConcurrency)
+
 	for _,ioc := range iocs {
-		genSingleSigma(ctx, model, ioc)
-		fmt.Println()
+		wg.Add(1)
+		go func(ioc string) {
+			defer wg.Done()
+			defer func() { <-semaphore }() // release slot when done
+
+			processIOC(ctx, model, ioc, &wg)
+		}(ioc) //avoid loop variable capture
 	}
+
+	wg.Wait()
 
 }

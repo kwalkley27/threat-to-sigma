@@ -9,13 +9,15 @@ type Config struct {
 	SpamhausFeedURL string
 	FeedLimit int
 	ModelName string
+	MaxConcurrency int
 }
 
 func Load() *Config {
 	return &Config{
 		GeminiAPIKey: os.Getenv("GEMINI_API_KEY"),
 		SpamhausFeedURL:   "https://www.spamhaus.org/drop/drop.txt",
-		FeedLimit: 5,
+		FeedLimit: 2,
 		ModelName: "gemini-2.5-pro",
+		MaxConcurrency: 5,
 	}
 }

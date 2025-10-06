@@ -10,7 +10,7 @@ import (
 
 func Retrieve() []string {
 	
-	//load global configs
+	//Load global configs
 	cfg := config.Load()
 
 	cidrList := []string{}

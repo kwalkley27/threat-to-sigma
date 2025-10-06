@@ -2,33 +2,29 @@ package genai
 
 import (
 	"fmt"
-	"os"
 	"log"
 	"context"
 
 	"github.com/google/generative-ai-go/genai"
 	"google.golang.org/api/option"
+
+	"github.com/kwalkley27/threat-to-sigma/config"
 )
 
-const ModelName = "gemini-2.5-pro"
+func getPrompt(s string) string {
 
-func FormatSigma(ctx context.Context, iocs []string) {
-		apiKey := os.Getenv("GEMINI_API_KEY")
-	if apiKey == "" {
-		log.Fatal("GEMINI_API_KEY environment variable not set")
-	}
+	template := `You are a cyber threat intelligence analyst. 
+	             Convert this indicator into a sigma rule: %v. 
+				 Output only the sigma rule formatted exactly 
+				 to sigma specifications.`
 
-	// Create a new client
-	client, err := genai.NewClient(ctx, option.WithAPIKey(apiKey))
-	if err != nil {
-		log.Fatalf("Failed to create client: %v", err)
-	}
-	defer client.Close()
+	return fmt.Sprintf(template, s)
+}
 
-	// Choose a model (gemini-1.5-flash is fast & cheap, gemini-1.5-pro is more powerful)
-	model := client.GenerativeModel(ModelName)
+func genSingleSigma(ctx context.Context, model *genai.GenerativeModel, ioc string) {
 	
-	prompt := fmt.Sprintf("You are a cyber threat intelligence analyst. Convert this indicator into a sigma rule: %v. Output only the sigma rule formatted exactly to sigma specifications", iocs[0])
+	// Generate prompt from ioc
+	prompt := getPrompt(ioc)
 
 	// Send a simple text prompt
 	resp, err := model.GenerateContent(ctx, genai.Text(prompt))
@@ -42,4 +38,31 @@ func FormatSigma(ctx context.Context, iocs []string) {
 			fmt.Println(part)
 		}
 	}
+}
+
+func FormatSigma(ctx context.Context, iocs []string) {
+	
+	//Load global configs
+	cfg := config.Load()
+	
+	if cfg.GeminiAPIKey == "" {
+		log.Fatal("GEMINI_API_KEY environment variable not set")
+	}
+
+	// Create a new client
+	client, err := genai.NewClient(ctx, option.WithAPIKey(cfg.GeminiAPIKey))
+	if err != nil {
+		log.Fatalf("Failed to create client: %v", err)
+	}
+	defer client.Close()
+
+	// Set Model
+	model := client.GenerativeModel(cfg.ModelName)
+	
+	// Generate and print sigma rule for each ioc
+	for _,ioc := range iocs {
+		genSingleSigma(ctx, model, ioc)
+		fmt.Println()
+	}
+
 }

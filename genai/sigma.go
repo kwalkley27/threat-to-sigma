@@ -12,16 +12,18 @@ import (
 	"github.com/kwalkley27/threat-to-sigma/config"
 )
 
-func getPrompt(s string) string {
+// Format the Gemini prompt with the given ioc
+func getPrompt(ioc string) string {
 
 	template := `You are a cyber threat intelligence analyst. 
 	             Convert this indicator into a sigma rule: %v. 
 				 Output only the sigma rule formatted exactly 
 				 to sigma specifications.`
 
-	return fmt.Sprintf(template, s)
+	return fmt.Sprintf(template, ioc)
 }
 
+// Generate a single Sigma translation
 func genSingleSigma(ctx context.Context, model *genai.GenerativeModel, ioc string) {
 	
 	// Generate prompt from ioc
@@ -41,12 +43,14 @@ func genSingleSigma(ctx context.Context, model *genai.GenerativeModel, ioc strin
 	}
 }
 
-func processIOC(ctx context.Context, model *genai.GenerativeModel, ioc string, wg *sync.WaitGroup) {
-	defer wg.Done()
+// Process definition used for asynchronous translation
+func processIOC(ctx context.Context, model *genai.GenerativeModel, ioc string) {
+	//defer wg.Done()
 	genSingleSigma(ctx, model, ioc)
 	fmt.Println()
 }
 
+// Manages the overall Sigma formatting flow
 func FormatSigma(ctx context.Context, iocs []string) {
 	
 	//Load global configs
@@ -66,20 +70,25 @@ func FormatSigma(ctx context.Context, iocs []string) {
 	// Set Model
 	model := client.GenerativeModel(cfg.ModelName)
 
-	// Generate and print sigma rule for each ioc asynchronously
+	//Generate and print sigma rule for each ioc asynchronously
 	var wg sync.WaitGroup
 	semaphore := make(chan struct{}, cfg.MaxConcurrency)
 
-	for _,ioc := range iocs {
+	for _, ioc := range iocs {
 		wg.Add(1)
+
+		// Acquire semaphore slot
+		semaphore <- struct{}{}
+
 		go func(ioc string) {
 			defer wg.Done()
-			defer func() { <-semaphore }() // release slot when done
+			defer func() { <-semaphore }() // Release slot when done
 
-			processIOC(ctx, model, ioc, &wg)
-		}(ioc) //avoid loop variable capture
+			processIOC(ctx, model, ioc)
+		}(ioc)
 	}
 
 	wg.Wait()
+
 
 }

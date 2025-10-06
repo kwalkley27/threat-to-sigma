@@ -1,20 +1,27 @@
 package main
 
 import (
-	// "fmt"
+	"fmt"
 	// "os"
 	// "log"
-	"context"
+	//"context"
 
 	// "github.com/google/generative-ai-go/genai"
 	// "google.golang.org/api/option"
-	"github.com/kwalkley27/threat-to-sigma/genai"
+	//"github.com/kwalkley27/threat-to-sigma/genai"
+	"github.com/kwalkley27/threat-to-sigma/feeds"
 )
 
 const ModelName = "gemini-2.5-flash"
 
 func main() {
-	ctx := context.Background()
+	//ctx := context.Background()
 
-	genai.FormatSigma(ctx, []string{"1.2.3.4"})
+	ipList := feeds.Retrieve()
+
+	for _,ip := range ipList {
+		fmt.Println(ip)
+	}
+
+	//genai.FormatSigma(ctx, []string{"1.2.3.4"})
 }

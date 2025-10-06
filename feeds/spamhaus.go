@@ -10,9 +10,10 @@ import (
 
 func Retrieve() []string {
 	
+	//load global configs
 	cfg := config.Load()
 
-	ipList := []string{}
+	cidrList := []string{}
 	
 	// Fetch the DROP list
 	resp, err := http.Get(cfg.SpamhausFeedURL)
@@ -36,10 +37,10 @@ func Retrieve() []string {
 		}
 		
 		//strip extra line details and add cidrs to list
-		ipList = append(ipList, strings.Split(line, " ; ")[0])
+		cidrList = append(cidrList, strings.Split(line, " ; ")[0])
 
 		//stop processing cidrs when the limit is reached
-		if len(ipList)>=cfg.FeedLimit {
+		if len(cidrList)>=cfg.FeedLimit {
 			break
 		}
 	}
@@ -49,5 +50,5 @@ func Retrieve() []string {
 		log.Fatalf("Error reading DROP list: %v", err)
 	}
 
-	return ipList
+	return cidrList
 }

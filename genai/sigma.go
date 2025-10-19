@@ -45,16 +45,15 @@ func genSingleSigma(ctx context.Context, model *genai.GenerativeModel, ioc strin
 
 // Process definition used for asynchronous translation
 func processIOC(ctx context.Context, model *genai.GenerativeModel, ioc string) {
-	//defer wg.Done()
 	genSingleSigma(ctx, model, ioc)
 	fmt.Println()
 }
 
 // Manages the overall Sigma formatting flow
-func FormatSigma(ctx context.Context, iocs []string) {
+func FormatSigma(cfg *config.Config, ctx context.Context, iocs []string) {
 	
 	//Load global configs
-	cfg := config.Load()
+	//cfg := config.Load()
 	
 	if cfg.GeminiAPIKey == "" {
 		log.Fatal("GEMINI_API_KEY environment variable not set")

@@ -1,0 +1,5 @@
+gemini_api_key: ""
+spamhaus_feed_url: "https://www.spamhaus.org/drop/drop.txt"
+feed_limit: 4
+model_name: "gemini-2.5-pro"
+max_concurrency: 2

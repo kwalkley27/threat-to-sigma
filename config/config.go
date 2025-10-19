@@ -1,23 +1,31 @@
 package config
 
 import (
-	"os"
+	"github.com/spf13/viper"
 )
 
 type Config struct {
-	GeminiAPIKey	string	//Google Gemini API key
-	SpamhausFeedURL string	//Spamhaus drop list URL
-	FeedLimit		int		//Max entries to be retrieved from the threat feed on one run
-	ModelName		string	//Gemini model to be used for genai inference
-	MaxConcurrency	int		//max number of concurrent genai api calls
+	GeminiAPIKey    string `mapstructure:"gemini_api_key"`
+	SpamhausFeedURL string `mapstructure:"spamhaus_feed_url"`
+	FeedLimit       int    `mapstructure:"feed_limit"`
+	ModelName       string `mapstructure:"model_name"`
+	MaxConcurrency  int    `mapstructure:"max_concurrency"`
 }
 
-func Load() *Config {
-	return &Config{
-		GeminiAPIKey: os.Getenv("GEMINI_API_KEY"),
-		SpamhausFeedURL:   "https://www.spamhaus.org/drop/drop.txt",
-		FeedLimit: 4,
-		ModelName: "gemini-2.5-pro",
-		MaxConcurrency: 2,
+func Load() (*Config, error) {
+	viper.SetConfigName("config")
+	viper.SetConfigType("yaml")
+	viper.AddConfigPath(".")
+	viper.AutomaticEnv()
+
+	if err := viper.ReadInConfig(); err != nil {
+		return nil, err
 	}
+
+	var cfg Config
+	if err := viper.Unmarshal(&cfg); err != nil {
+		return nil, err
+	}
+
+	return &cfg, nil
 }

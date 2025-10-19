@@ -2,29 +2,26 @@ package feeds
 
 import (
 	"bufio"
-	"log"
+	"fmt"
 	"net/http"
 	"strings"
+
 	"github.com/kwalkley27/threat-to-sigma/config"
 )
 
-func Retrieve(cfg *config.Config) []string {
-	
-	//Load global configs
-	//cfg := config.Load()
-
+func Retrieve(cfg *config.Config) ([]string, error) {
 	cidrList := []string{}
-	
+
 	// Fetch the DROP list
 	resp, err := http.Get(cfg.SpamhausFeedURL)
 	if err != nil {
-		log.Fatalf("Failed to fetch DROP list: %v", err)
+		return nil, fmt.Errorf("failed to fetch DROP list: %w", err)
 	}
 	defer resp.Body.Close()
 
 	// Check if the response status is OK
 	if resp.StatusCode != http.StatusOK {
-		log.Fatalf("Failed to fetch DROP list: %s", resp.Status)
+		return nil, fmt.Errorf("failed to fetch DROP list: %s", resp.Status)
 	}
 
 	// Create a scanner to read the response body line by line
@@ -35,20 +32,20 @@ func Retrieve(cfg *config.Config) []string {
 		if len(line) == 0 || line[0] == '#' || line[0] == ';' {
 			continue
 		}
-		
+
 		//strip extra line details and add cidrs to list
 		cidrList = append(cidrList, strings.Split(line, " ; ")[0])
 
 		//stop processing cidrs when the limit is reached
-		if len(cidrList)>=cfg.FeedLimit {
+		if len(cidrList) >= cfg.FeedLimit {
 			break
 		}
 	}
 
 	// Check for errors during scanning
 	if err := scanner.Err(); err != nil {
-		log.Fatalf("Error reading DROP list: %v", err)
+		return nil, fmt.Errorf("error reading DROP list: %w", err)
 	}
 
-	return cidrList
+	return cidrList, nil
 }

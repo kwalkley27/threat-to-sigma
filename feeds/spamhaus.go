@@ -8,10 +8,10 @@ import (
 	"github.com/kwalkley27/threat-to-sigma/config"
 )
 
-func Retrieve() []string {
+func Retrieve(cfg *config.Config) []string {
 	
 	//Load global configs
-	cfg := config.Load()
+	//cfg := config.Load()
 
 	cidrList := []string{}
 	

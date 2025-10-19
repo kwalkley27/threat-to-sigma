@@ -51,10 +51,10 @@ func processIOC(ctx context.Context, model *genai.GenerativeModel, ioc string) {
 }
 
 // Manages the overall Sigma formatting flow
-func FormatSigma(ctx context.Context, iocs []string) {
+func FormatSigma(cfg *config.Config, ctx context.Context, iocs []string) {
 	
 	//Load global configs
-	cfg := config.Load()
+	//cfg := config.Load()
 	
 	if cfg.GeminiAPIKey == "" {
 		log.Fatal("GEMINI_API_KEY environment variable not set")

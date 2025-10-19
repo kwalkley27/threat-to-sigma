@@ -16,8 +16,8 @@ func Load() *Config {
 	return &Config{
 		GeminiAPIKey: os.Getenv("GEMINI_API_KEY"),
 		SpamhausFeedURL:   "https://www.spamhaus.org/drop/drop.txt",
-		FeedLimit: 2,
+		FeedLimit: 4,
 		ModelName: "gemini-2.5-pro",
-		MaxConcurrency: 5,
+		MaxConcurrency: 2,
 	}
 }

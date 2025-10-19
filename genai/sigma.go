@@ -45,7 +45,6 @@ func genSingleSigma(ctx context.Context, model *genai.GenerativeModel, ioc strin
 
 // Process definition used for asynchronous translation
 func processIOC(ctx context.Context, model *genai.GenerativeModel, ioc string) {
-	//defer wg.Done()
 	genSingleSigma(ctx, model, ioc)
 	fmt.Println()
 }

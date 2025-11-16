@@ -18,8 +18,20 @@ func Load() (*Config, error) {
 	viper.AddConfigPath(".")
 	viper.AutomaticEnv()
 
+	// sensible defaults so the program can run without a config file
+	viper.SetDefault("spamhaus_feed_url", "https://www.spamhaus.org/drop/drop.txt")
+	viper.SetDefault("feed_limit", 10)
+	viper.SetDefault("model_name", "gemini-1.5-pro")
+	viper.SetDefault("max_concurrency", 5)
+
+	// Try to read config file, but do not fail if it's missing — allow
+	// environment variables and defaults to drive configuration.
 	if err := viper.ReadInConfig(); err != nil {
-		return nil, err
+		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+			// No config file found; continue with env vars and defaults
+		} else {
+			return nil, err
+		}
 	}
 
 	var cfg Config

@@ -13,10 +13,10 @@ Threat to Sigma is a tool that scrapes open-source threat intelligence feeds and
 ## Installation
 
 1.  **Clone the repository:**
-    ```bash
-    git clone https://github.com/user/threat-to-sigma.git
-    cd threat-to-sigma
-    ```
+  ```bash
+  git clone https://github.com/kwalkley27/threat-to-sigma.git
+  cd threat-to-sigma
+  ```
 
 2.  **Install dependencies:**
     ```bash
@@ -58,10 +58,38 @@ export GEMINI_API_KEY="your-api-key-here"
 
 ## Usage
 
-Ensure your configuration is set up correctly, then run the application:
+Ensure your configuration is set up correctly, then run the application.
+
+Example (using environment variables):
 
 ```bash
+# set required secret (do not commit your real key)
+export GEMINI_API_KEY="your-api-key-here"
+
+# build and run
+go build -o threat-to-sigma ./cmd/app
 ./threat-to-sigma
+```
+
+Example (expected) output (a single generated Sigma rule, YAML):
+
+```yaml
+title: Suspicious Network Connection to C2 Server
+id: 5b2e7f7a-3b5d-4d7e-8f3a-2b1c0d1e4f9a
+status: experimental
+description: Detects network connections to a known command and control (C2) server.
+author: Gemini
+date: 2023/10/27
+logsource:
+  category: network_connection
+  product: zeek
+detection:
+  selection:
+    - dst_ip: "1.0.0.0/24"
+  condition: selection
+falsepositives:
+  - Legitimate traffic to the IP address.
+level: high
 ```
 
 The application will then scrape the configured threat intelligence feeds, generate Sigma rules, and print them to standard output.
